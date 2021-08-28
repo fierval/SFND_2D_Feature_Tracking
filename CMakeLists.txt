@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2)
+project(camera_fusion CXX CUDA)
 
-add_definitions(-std=c++11)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-project(camera_fusion)
 
 find_package(OpenCV 4.1 REQUIRED)
 
