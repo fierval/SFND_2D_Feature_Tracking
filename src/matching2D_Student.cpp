@@ -10,28 +10,60 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
+    cv::Mat descSourceToUse = descSource, descRefToUse = descRef;
+    bool useConvertedMats = descSource.type() != CV_32F;
 
-    if (matcherType.compare("MAT_BF") == 0)
+    if (matcherType.compare(MatcherTypes::MAT_BF) == 0)
     {
         int normType = cv::NORM_HAMMING;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
-    else if (matcherType.compare("MAT_FLANN") == 0)
+    else if (matcherType.compare(MatcherTypes::MAT_FLANN) == 0)
     {
-        // ...
+      if (useConvertedMats)
+      { // OpenCV bug workaround : convert binary descriptors to floating point due to a bug in current OpenCV implementation
+        descSource.convertTo(descSourceToUse, CV_32F);
+        descRef.convertTo(descRefToUse, CV_32F);
+      }
+
+      matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
+      cout << "FLANN matching";
     }
+    else {
+      assert(false);
+    }
+
+    double t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
     // perform matching task
-    if (selectorType.compare("SEL_NN") == 0)
+    if (selectorType.compare(SelectorTypes::SEL_NN) == 0)
     { // nearest neighbor (best match)
 
-        matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
+        matcher->match(descSourceToUse, descRefToUse, matches); // Finds the best match for each descriptor in desc1
     }
-    else if (selectorType.compare("SEL_KNN") == 0)
+    else if (selectorType.compare(SelectorTypes::SEL_KNN) == 0)
     { // k nearest neighbors (k=2)
 
-        // ...
+      int k = 2;
+      vector<vector<cv::DMatch>> knn_matches;
+      matcher->knnMatch(descSourceToUse, descRefToUse, knn_matches, k); // finds the 2 best matches
+
+      // filter matches using descriptor distance ratio test
+      double minDescDistRatio = 0.8;
+      auto new_it = std::remove_if(knn_matches.begin(), knn_matches.end(), 
+        [&minDescDistRatio](vector<cv::DMatch>& m) { return m[0].distance >= minDescDistRatio * m[1].distance; });
+
+      knn_matches.erase(new_it, knn_matches.end());
+
+      std::transform(knn_matches.begin(), knn_matches.end(), back_inserter(matches), [](vector<cv::DMatch>& v) {return v[0]; });
     }
+    else {
+      assert(false);
+    }
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << selectorType << " with n=" << matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
+
 }
 
 // Use one of several types of state-of-art descriptors to uniquely identify keypoints
