@@ -33,7 +33,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
       assert(false);
     }
 
-    double t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    double t = (double)cv::getTickCount();
 
     // perform matching task
     if (selectorType.compare(SelectorTypes::SEL_NN) == 0)

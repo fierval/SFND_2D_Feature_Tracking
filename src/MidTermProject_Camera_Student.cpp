@@ -158,9 +158,9 @@ int main(int argc, const char* argv[])
       /* MATCH KEYPOINT DESCRIPTORS */
 
       vector<cv::DMatch> matches;
-      string matcherType = MatcherTypes::MAT_BF;        // MAT_BF, MAT_FLANN
+      string matcherType = MatcherTypes::MAT_FLANN;        // MAT_BF, MAT_FLANN
       string descriptorClass = getDescriptorClass(descriptorType); // DES_BINARY, DES_HOG
-      string selectorType = SelectorTypes::SEL_NN;       // SEL_NN, SEL_KNN
+      string selectorType = SelectorTypes::SEL_KNN;       // SEL_NN, SEL_KNN
 
       //// STUDENT ASSIGNMENT
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
