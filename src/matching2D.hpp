@@ -19,11 +19,36 @@
 #include "dataStructures.h"
 
 
-void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis=false);
-void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis=false);
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis=false);
-void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType);
-void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
-                      std::vector<cv::DMatch> &matches, std::string descriptorType, std::string matcherType, std::string selectorType);
+void detKeypointsHarris(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, bool bVis = false);
+void detKeypointsShiTomasi(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, bool bVis = false);
+void detKeypointsModern(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, std::string detectorType, bool bVis = false);
+void descKeypoints(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, cv::Mat& descriptors, std::string descriptorType);
+void matchDescriptors(std::vector<cv::KeyPoint>& kPtsSource, std::vector<cv::KeyPoint>& kPtsRef, cv::Mat& descSource, cv::Mat& descRef,
+  std::vector<cv::DMatch>& matches, std::string descriptorType, std::string matcherType, std::string selectorType);
 
+inline void visualizeKeypoints(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, const std::string& windowName) {
+  cv::Mat visImage = img.clone();
+  cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+  cv::namedWindow(windowName, 6);
+  imshow(windowName, visImage);
+  cv::waitKey(0);
+}
+
+inline cv::Ptr<cv::FeatureDetector> createDetectorOfType(const std::string& detType) {
+
+  if (detType.compare(DetectorTypes::AKAZE) == 0) {
+    return cv::AKAZE::create();
+  }
+  if (detType.compare(DetectorTypes::BRISK) == 0) {
+    return cv::BRISK::create();
+  }
+  if (detType.compare(DetectorTypes::ORB) == 0) {
+    return cv::ORB::create();
+  }
+  if (detType.compare(DetectorTypes::SIFT) == 0) {
+    return cv::SIFT::create();
+  }
+
+  return nullptr;
+}
 #endif /* matching2D_hpp */

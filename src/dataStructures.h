@@ -14,5 +14,13 @@ struct DataFrame { // represents the available sensor information at the same ti
     std::vector<cv::DMatch> kptMatches; // keypoint matches between previous and current frame
 };
 
-
+struct DetectorTypes {
+  constexpr static char SHITOMASI[] = "SHITOMASI";
+  constexpr static char HARRIS[] = "HARRIS";
+  constexpr static char FAST[] = "FAST";
+  constexpr static char BRISK[] = "BRISK";
+  constexpr static char ORB[] = "ORB";
+  constexpr static char AKAZE[] = "AKAZE";
+  constexpr static char SIFT[] = "SIFT";
+};
 #endif /* dataStructures_h */
