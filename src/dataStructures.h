@@ -31,7 +31,9 @@ struct DescriptorTypes {
   constexpr static char ORB[] = "ORB";
   constexpr static char AKAZE[] = "AKAZE";
   constexpr static char SIFT[] = "SIFT";
+};
 
+struct DescriptorClasses {
   constexpr static char DES_BINARY[] = "DES_BINARY";
   constexpr static char DES_HOG[] = "DES_HOG";
 };

@@ -51,4 +51,38 @@ inline cv::Ptr<cv::FeatureDetector> createDetectorOfType(const std::string& detT
 
   return nullptr;
 }
+
+inline cv::Ptr<cv::FeatureDetector> createDescriptorOfType(const std::string& detType) {
+
+  if (detType.compare(DetectorTypes::AKAZE) == 0) {
+    return cv::AKAZE::create();
+  }
+  if (detType.compare(DetectorTypes::BRISK) == 0) {
+    return cv::BRISK::create();
+  }
+  if (detType.compare(DetectorTypes::ORB) == 0) {
+    return cv::ORB::create();
+  }
+  if (detType.compare(DetectorTypes::SIFT) == 0) {
+    return cv::SIFT::create();
+  }
+  if (detType.compare(DetectorTypes::FAST) == 0) {
+    int threshold = 30;                                                              // difference between intensity of the central pixel and pixels of a circle around this pixel
+    bool bNMS = true;                                                                // perform non-maxima suppression on keypoints
+    cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16; // TYPE_9_16, TYPE_7_12, TYPE_5_8
+    return cv::FastFeatureDetector::create(threshold, bNMS, type);
+  }
+
+  return nullptr;
+}
+
+inline const std::string getDescriptorClass(const std::string& descType) {
+
+  if (descType.compare(DescriptorTypes::SIFT) == 0) {
+    return DescriptorClasses::DES_HOG;
+  }
+
+  // be quick about it, although this should probably check for invalid type
+  return DescriptorClasses::DES_BINARY;
+}
 #endif /* matching2D_hpp */

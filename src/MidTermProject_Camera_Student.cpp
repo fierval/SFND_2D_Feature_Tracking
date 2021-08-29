@@ -124,7 +124,7 @@ int main(int argc, const char* argv[])
     {
       int maxKeypoints = 50;
 
-      if (detectorType.compare("SHITOMASI") == 0)
+      if (detectorType.compare(DetectorTypes::SHITOMASI) == 0)
       { // there is no response info, so keep the first 50 as they are sorted in descending quality order
         keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
       }
@@ -143,7 +143,7 @@ int main(int argc, const char* argv[])
     //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
     cv::Mat descriptors;
-    string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+    string descriptorType = DescriptorTypes::BRISK; // BRIEF, ORB, FREAK, AKAZE, SIFT
     descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
     //// EOF STUDENT ASSIGNMENT
 
@@ -158,9 +158,9 @@ int main(int argc, const char* argv[])
       /* MATCH KEYPOINT DESCRIPTORS */
 
       vector<cv::DMatch> matches;
-      string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-      string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-      string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+      string matcherType = MatcherTypes::MAT_BF;        // MAT_BF, MAT_FLANN
+      string descriptorType = getDescriptorClass(descriptorType); // DES_BINARY, DES_HOG
+      string selectorType = SelectorTypes::SEL_NN;       // SEL_NN, SEL_KNN
 
       //// STUDENT ASSIGNMENT
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp

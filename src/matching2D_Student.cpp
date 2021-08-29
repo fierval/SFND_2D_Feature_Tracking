@@ -163,19 +163,7 @@ void detKeypointsHarris(vector<cv::KeyPoint>& keypoints, cv::Mat& img, bool bVis
 
 void detKeypointsModern(std::vector<cv::KeyPoint>& keypoints, cv::Mat& img, std::string detectorType, bool bVis) {
 
-  cv::Ptr<cv::FeatureDetector> detector;
-
-  // FAST is an outlier
-  if (detectorType.compare(DetectorTypes::FAST) == 0) {
-    int threshold = 30;                                                              // difference between intensity of the central pixel and pixels of a circle around this pixel
-    bool bNMS = true;                                                                // perform non-maxima suppression on keypoints
-    cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16; // TYPE_9_16, TYPE_7_12, TYPE_5_8
-    detector = cv::FastFeatureDetector::create(threshold, bNMS, type);
-  }
-  else 
-  {
-    detector = createDetectorOfType(detectorType);
-  }
+  cv::Ptr<cv::FeatureDetector> detector = createDetectorOfType(detectorType);
 
   if (detector.empty()) {
     throw std::invalid_argument("Unknown detector type");
