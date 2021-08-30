@@ -188,7 +188,6 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
         std::cout << "Press key to continue to next image" << endl;
         cv::waitKey(0); // wait for key to be pressed
       }
-      bVis = false;
     }
 
   } // eof loop over all images
@@ -200,9 +199,9 @@ int main(int argc, const char* argv[])
   bool bVis = false;            // visualize results
   string outFile = "../../../doc/";
 
-  CsvLogger<int> log_keypoints(outFile + "keypoints.csv");
-  CsvLogger<int> log_det_desc_keypoints(outFile + "det_desc_keys.csv");
-  CsvLogger<float> log_det_desc_timings(outFile + "det_desc_times.csv");
+  CsvLogger<int> log_keypoints("Detector", outFile + "keypoints.csv");
+  CsvLogger<int> log_det_desc_keypoints("Detector_Descriptor", outFile + "det_desc_keys.csv");
+  CsvLogger<float> log_det_desc_timings("Detector_Descriptor", outFile + "det_desc_times.csv");
 
   /* MAIN LOOP OVER ALL IMAGES */
 
