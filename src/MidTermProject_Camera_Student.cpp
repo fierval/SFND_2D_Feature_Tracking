@@ -16,15 +16,13 @@
 #include "dataStructures.h"
 #include "matching2D.hpp"
 
+#include "logger.hpp"
 using namespace std;
 
-/* MAIN PROGRAM */
-int main(int argc, const char* argv[])
-{
-
+void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_keys, CsvLogger<float>& log_det_desc_times, string& detectorType, string& descriptorType, bool bVis = false) {
   /* INIT VARIABLES AND DATA STRUCTURES */
 
-  // data location
+// data location
   string dataPath = "../../../";
 
   // camera
@@ -39,9 +37,7 @@ int main(int argc, const char* argv[])
   int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
   vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
 
-  bool bVis = false;            // visualize results
-
-  /* MAIN LOOP OVER ALL IMAGES */
+    // data output files
 
   for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
   {
@@ -75,13 +71,12 @@ int main(int argc, const char* argv[])
     }
 
     //// EOF STUDENT ASSIGNMENT
-    cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
+    std::cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
 
     /* DETECT IMAGE KEYPOINTS */
 
     // extract 2D keypoints from current image
     vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-    string detectorType = DetectorTypes::FAST;
 
     //// STUDENT ASSIGNMENT
     //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -129,12 +124,12 @@ int main(int argc, const char* argv[])
         keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
       }
       cv::KeyPointsFilter::retainBest(keypoints, maxKeypoints);
-      cout << " NOTE: Keypoints have been limited!" << endl;
+      std::cout << " NOTE: Keypoints have been limited!" << endl;
     }
 
     // push keypoints and descriptor for current frame to end of data buffer
     (dataBuffer.end() - 1)->keypoints = keypoints;
-    cout << "#2 : DETECT KEYPOINTS done" << endl;
+    std::cout << "#2 : DETECT KEYPOINTS done" << endl;
 
     /* EXTRACT KEYPOINT DESCRIPTORS */
 
@@ -150,7 +145,7 @@ int main(int argc, const char* argv[])
     // push descriptors for current frame to end of data buffer
     (dataBuffer.end() - 1)->descriptors = descriptors;
 
-    cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
+    std::cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
     if (dataBuffer.size() > 1) // wait until at least two images have been processed
     {
@@ -175,10 +170,9 @@ int main(int argc, const char* argv[])
       // store matches in current data frame
       (dataBuffer.end() - 1)->kptMatches = matches;
 
-      cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
+      std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
       // visualize matches between current and previous image
-      bVis = true;
       if (bVis)
       {
         cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
@@ -191,7 +185,7 @@ int main(int argc, const char* argv[])
         string windowName = "Matching keypoints between two camera images";
         cv::namedWindow(windowName, 7);
         cv::imshow(windowName, matchImg);
-        cout << "Press key to continue to next image" << endl;
+        std::cout << "Press key to continue to next image" << endl;
         cv::waitKey(0); // wait for key to be pressed
       }
       bVis = false;
@@ -199,5 +193,53 @@ int main(int argc, const char* argv[])
 
   } // eof loop over all images
 
+}
+/* MAIN PROGRAM */
+int main(int argc, const char* argv[])
+{
+  bool bVis = false;            // visualize results
+  string outFile = "../../../doc/";
+
+  CsvLogger<int> log_keypoints(outFile + "keypoints.csv");
+  CsvLogger<int> log_det_desc_keypoints(outFile + "det_desc_keys.csv");
+  CsvLogger<float> log_det_desc_timings(outFile + "det_desc_times.csv");
+
+  /* MAIN LOOP OVER ALL IMAGES */
+
+  vector<string> detectors{ DetectorTypes::AKAZE, DetectorTypes::BRISK, DetectorTypes::FAST, DetectorTypes::HARRIS, DetectorTypes::ORB, DetectorTypes::SHITOMASI, DetectorTypes::SIFT };
+  vector<string> descriptors{ DescriptorTypes::BRIEF, DescriptorTypes::BRISK, DescriptorTypes::FREAK, DescriptorTypes::ORB, DescriptorTypes::SIFT };
+
+  vector<std::pair<string, string>> detector_descriptor;
+
+  unordered_map<string, vector<int>> keypoint_map;
+  unordered_map<string, vector<float>> timing_map;
+
+  // AKAZE descriptor requires AKAZE points
+  detector_descriptor.push_back(std::make_pair(DetectorTypes::AKAZE, DescriptorTypes::AKAZE));
+
+  // for each of the project tasks
+  for (string& detectorType  : detectors) {
+    vector<string> actual_descriptors;
+    std::copy(descriptors.begin(), descriptors.end(), back_inserter(actual_descriptors));
+
+    // AKAZE descriptor can only be used with AKAZE points
+    if (detectorType == DetectorTypes::AKAZE) {
+      actual_descriptors.push_back(DescriptorTypes::AKAZE);
+    }
+
+    for (string& descriptorType : actual_descriptors) {
+      run_data_collection(log_keypoints, log_det_desc_keypoints, log_det_desc_timings, detectorType, descriptorType, bVis);
+    }
+  }
+
+  log_keypoints.dump();
+  log_det_desc_timings.dump();
+  log_det_desc_keypoints.dump();
+
+  std::cout << std::endl << "==========================================================" << std::endl;
+  std::cout << "                    Visual Run" << std::endl;
+
+  bVis = true;
+  run_data_collection(log_keypoints, log_det_desc_keypoints, log_det_desc_timings, detectors[1], descriptors[1], bVis);
   return 0;
 }
