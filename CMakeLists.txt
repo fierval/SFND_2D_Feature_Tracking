@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(camera_fusion CXX CUDA)
+project(camera_fusion CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 

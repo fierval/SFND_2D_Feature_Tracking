@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iterator>
 
 template <typename T = int>
 class CsvLogger {
@@ -25,7 +26,7 @@ public:
 			return;
 		}
 		else if(result_map.count(key) == 0) {
-			result_map.insert(std::make_pair(key, vector<T>()));
+			result_map.insert(std::make_pair(key, std::vector<T>()));
 		}
 
 		result_map[key].push_back(res);
