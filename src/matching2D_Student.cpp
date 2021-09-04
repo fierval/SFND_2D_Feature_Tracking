@@ -3,6 +3,30 @@
 
 using namespace std;
 
+// For debugging
+string type2str(int type) {
+  string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch (depth) {
+  case CV_8U:  r = "8U"; break;
+  case CV_8S:  r = "8S"; break;
+  case CV_16U: r = "16U"; break;
+  case CV_16S: r = "16S"; break;
+  case CV_32S: r = "32S"; break;
+  case CV_32F: r = "32F"; break;
+  case CV_64F: r = "64F"; break;
+  default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans + '0');
+
+  return r;
+}
+
 // Find best matches for keypoints in two camera images based on several matching methods
 void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
                       std::vector<cv::DMatch> &matches, std::string descriptorType, std::string matcherType, std::string selectorType)
@@ -10,22 +34,29 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
-    cv::Mat descSourceToUse = descSource, descRefToUse = descRef;
-    bool useConvertedMats = descSource.type() != CV_32F;
+    cv::Mat descSourceToUse, descRefToUse;
+    bool useConvertedMats = descSource.type() != CV_32F 
+      && matcherType.compare(MatcherTypes::MAT_FLANN) == 0 
+      && selectorType.compare(SelectorTypes::SEL_KNN) == 0;
+
+    // crude but effective in case we need to do conversions
+    if (useConvertedMats)
+    { // OpenCV bug workaround : convert binary descriptors to floating point due to a bug in current OpenCV implementation
+      descSource.convertTo(descSourceToUse, CV_32F);
+      descRef.convertTo(descRefToUse, CV_32F);
+    }
+    else {
+      descSource.copyTo(descSourceToUse);
+      descRef.copyTo(descRefToUse);
+    }
 
     if (matcherType.compare(MatcherTypes::MAT_BF) == 0)
     {
-        int normType = cv::NORM_HAMMING;
-        matcher = cv::BFMatcher::create(normType, crossCheck);
+      int normType = descriptorType.compare(DescriptorClasses::DES_BINARY) == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
+      matcher = cv::BFMatcher::create(normType, crossCheck);
     }
     else if (matcherType.compare(MatcherTypes::MAT_FLANN) == 0)
     {
-      if (useConvertedMats)
-      { // OpenCV bug workaround : convert binary descriptors to floating point due to a bug in current OpenCV implementation
-        descSource.convertTo(descSourceToUse, CV_32F);
-        descRef.convertTo(descRefToUse, CV_32F);
-      }
-
       matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
       cout << "FLANN matching";
     }
@@ -39,7 +70,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     if (selectorType.compare(SelectorTypes::SEL_NN) == 0)
     { // nearest neighbor (best match)
 
-        matcher->match(descSourceToUse, descRefToUse, matches); // Finds the best match for each descriptor in desc1
+        matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
     }
     else if (selectorType.compare(SelectorTypes::SEL_KNN) == 0)
     { // k nearest neighbors (k=2)

@@ -154,7 +154,7 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
       /* MATCH KEYPOINT DESCRIPTORS */
 
       vector<cv::DMatch> matches;
-      string matcherType = MatcherTypes::MAT_FLANN;        // MAT_BF, MAT_FLANN
+      string matcherType = MatcherTypes::MAT_BF;        // MAT_BF, MAT_FLANN
       string descriptorClass = getDescriptorClass(descriptorType); // DES_BINARY, DES_HOG
       string selectorType = SelectorTypes::SEL_KNN;       // SEL_NN, SEL_KNN
 
