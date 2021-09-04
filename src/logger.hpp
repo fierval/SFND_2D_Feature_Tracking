@@ -25,7 +25,7 @@ public:
 			return;
 		}
 		else if(result_map.count(key) == 0) {
-			result_map.insert(std::make_pair(key, vector<T>));
+			result_map.insert(std::make_pair(key, vector<T>()));
 		}
 
 		result_map[key].push_back(res);
@@ -43,7 +43,7 @@ public:
 
 		std::for_each(result_map.begin(), result_map.end(), [&out](std::pair<std::string, std::vector<T>> kv) {
 			
-			out << kv.first;
+			out << kv.first << ",";
 			std::copy(kv.second.begin(), kv.second.end() - 1, std::ostream_iterator<T>(out, ","));
 			out << *(kv.second.end() - 1) << std::endl;
 

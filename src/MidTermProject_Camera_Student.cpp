@@ -83,6 +83,8 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
     //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
     bool bVisDetector = false;
 
+    auto startTime = std::chrono::steady_clock::now();
+
     if (detectorType.compare(DetectorTypes::SHITOMASI) == 0)
     {
       detKeypointsShiTomasi(keypoints, imgGray, bVisDetector);
@@ -95,6 +97,7 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
     {
       detKeypointsModern(keypoints, imgGray, detectorType, bVisDetector);
     }
+
     //// EOF STUDENT ASSIGNMENT
 
     //// STUDENT ASSIGNMENT
@@ -110,7 +113,6 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
         });
       keypoints.erase(new_end, keypoints.end());
     }
-
     //// EOF STUDENT ASSIGNMENT
 
     // optional : limit number of keypoints (helpful for debugging and learning)
@@ -138,7 +140,6 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
     //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
     cv::Mat descriptors;
-    string descriptorType = DescriptorTypes::BRISK; // BRIEF, ORB, FREAK, AKAZE, SIFT
     descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
     //// EOF STUDENT ASSIGNMENT
 
@@ -189,6 +190,19 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
         cv::waitKey(0); // wait for key to be pressed
       }
     }
+    auto endTime = std::chrono::steady_clock::now();
+    if (!bVis) {
+      log_keys.add_result(detectorType, dataBuffer.rbegin()->keypoints.size());
+      if (dataBuffer.size() < 2) {
+        log_det_desc_keys.add_result(detectorType, descriptorType, 0);
+        log_det_desc_times.add_result(detectorType, descriptorType, 0.f);
+
+      }
+      else {
+        log_det_desc_keys.add_result(detectorType, descriptorType, dataBuffer.rbegin()->kptMatches.size());
+        log_det_desc_times.add_result(detectorType, descriptorType, std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() / 1000.f);
+      }
+    }
 
   } // eof loop over all images
 
@@ -227,6 +241,11 @@ int main(int argc, const char* argv[])
     }
 
     for (string& descriptorType : actual_descriptors) {
+      if (detectorType == DetectorTypes::SIFT && descriptorType == DescriptorTypes::ORB) {
+        continue;
+      }
+      std::cout << std::endl << "==========================================================" << std::endl;
+      std::cout << "Running: " << detectorType << "/" << descriptorType << std::endl;
       run_data_collection(log_keypoints, log_det_desc_keypoints, log_det_desc_timings, detectorType, descriptorType, bVis);
     }
   }
