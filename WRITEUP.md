@@ -23,7 +23,7 @@ I would normally use `boost` for this with the data structure already implemente
 
 ## MP.2 Keypoint Detection
 
-`HARRIS` is an old detector requiring its own `OpenCV` call for corner detection and then post-processing and NMS. I used the code we worked on during the excercise in the lessons to implement these stages of `HARRIS` detector implementation. 
+`HARRIS` is an old detector requiring its own `OpenCV` call for corner detection and then post-processing and NMS. I used the code we worked on during the excercise in the lessons to implement these stages of `HARRIS` detector. 
 
 All the rest of the detectors are nicely packaged by `OpenCV` into their own static `create()` functions and all derive from `cv::FeatureDetector`, so a cast and a call to the virtual `detect` does the job. I have refactored the selection logic into `createDetectorOfType`
 
@@ -55,9 +55,11 @@ These are the detectors sorted by the average number of keypoints descending. I 
 
 Using BF matcher / kNN selector.
 
-[results](doc/det_desc_keys.csv). Averaging over the last 9 frames:
+[results](doc/det_desc_keys.csv). 
 
-`BRISK/BRIEF` pair detects most keypoints, while the median hangs aroun ~100
+Averaging over the last 9 frames.
+
+`BRISK/BRIEF` pair detects most keypoints, while the median hangs aroun ~100. I'm preferring the median detectors: not too many / not too few, potentially less noise with still enough data.
 
 ## MP.9 Performance Evaluation 3: Log times & pick top 3
 
