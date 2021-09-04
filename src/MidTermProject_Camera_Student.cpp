@@ -23,7 +23,7 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
   /* INIT VARIABLES AND DATA STRUCTURES */
 
 // data location
-  string dataPath = "../../../";
+  string dataPath = "../";
 
   // camera
   string imgBasePath = dataPath + "images/";
@@ -211,7 +211,7 @@ void run_data_collection(CsvLogger<int>& log_keys, CsvLogger<int>& log_det_desc_
 int main(int argc, const char* argv[])
 {
   bool bVis = false;            // visualize results
-  string outFile = "../../../doc/";
+  string outFile = "../doc/";
 
   CsvLogger<int> log_keypoints("Detector", outFile + "keypoints.csv");
   CsvLogger<int> log_det_desc_keypoints("Detector_Descriptor", outFile + "det_desc_keys.csv");
