@@ -32,7 +32,7 @@ public:
 	}
 
 	void add_result(std::string& detector, std::string& descriptor, T res) {
-		std::string key = detector + "/" + "descriptor";
+		std::string key = detector + "/" + descriptor;
 		add_result(key, res);
 	}
 
